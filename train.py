@@ -21,38 +21,28 @@ epochs = 10
 if len(argv) > 1:
     epochs = int(argv[1])
 
-PREVIOUS_MODEL_PATH = None
+model = models.Sequential()
 
-if PREVIOUS_MODEL_PATH is None:
-    model = models.Sequential()
+# Modelando a rede
+model.add(layers.Conv2D(32, (3, 3), padding='same', activation='relu', input_shape=(CROP_SIZE, CROP_SIZE, 1)))
+model.add(layers.MaxPooling2D((2, 2)))
+model.add(layers.Conv2D(32, (3, 3), padding='same', activation='relu'))
+model.add(layers.MaxPooling2D((2, 2)))
+model.add(layers.Conv2D(32, (3, 3), padding='same', activation='relu'))
+model.add(layers.Flatten())
+model.add(layers.Dense(32, activation='relu'))
+model.add(layers.Dense(1, activation='sigmoid'))
 
-    # Modelando a rede
-    model.add(layers.Conv2D(32, (3, 3), padding='same', activation='relu', input_shape=(CROP_SIZE, CROP_SIZE, 1)))
-    model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Conv2D(32, (3, 3), padding='same', activation='relu'))
-    model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Conv2D(32, (3, 3), padding='same', activation='relu'))
-    model.add(layers.Flatten())
-    model.add(layers.Dense(32, activation='relu'))
-    model.add(layers.Dense(1, activation='sigmoid'))
+model.compile(
+    optimizer='adam',
+    loss=tf.keras.losses.BinaryCrossentropy(),
+    metrics=[
+        tf.keras.metrics.BinaryAccuracy(),
+        # tfa.metrics.F1Score(num_classes=1, average='macro'),
+    ]
+)
 
-    model.summary()
-
-    model.compile(
-        optimizer='adam',
-        loss=tf.keras.losses.BinaryCrossentropy(),
-        metrics=[
-            tf.keras.metrics.BinaryAccuracy(),
-            # tfa.metrics.F1Score(num_classes=1, average='macro'),
-        ]
-    )
-else:
-    model = models.load_model(
-        PREVIOUS_MODEL_PATH,
-        custom_objects={
-            'Addons>F1Score': tfa.metrics.F1Score
-        }
-    )
+model.summary()
 
 history = model.fit(
     train_images,
@@ -70,7 +60,7 @@ plt.ylabel('Metricas')
 plt.ylim([0.5, 1])
 plt.legend(loc='upper left')
 
-model_filename = f'{epochs}_32_conv_32_dense_{floor(time())}'
+model_filename = f'{epochs}__32_conv_32_dense_{floor(time())}'
 
 plt.savefig(f'./model_graphs/{model_filename}.jpg')
 
