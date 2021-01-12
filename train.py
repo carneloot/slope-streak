@@ -44,11 +44,30 @@ model.compile(
 
 model.summary()
 
+model_filename = f'{epochs}__32_conv_32_dense_{floor(time())}'
+
 history = model.fit(
     train_images,
     train_labels,
     epochs=epochs,
-    validation_data=(val_images, val_labels)
+    validation_data=(val_images, val_labels),
+    verbose=2,
+    shuffle=True,
+    callbacks=[
+        tf.keras.callbacks.ModelCheckpoint(
+            filepath=f'./best/{model_filename}.h5',
+            monitor='val_binary_accuracy',
+            mode='max',
+            save_best_only=True,
+            verbose=1
+        ),
+        # tf.keras.callbacks.EarlyStopping(
+        #     monitor='val_binary_accuracy',
+        #     min_delta=1e-4,
+        #     patience=50,
+        #     verbose=1,
+        # )
+    ]
 )
 
 # plt.plot(history.history['f1_score'], label='F1 do Treino')
@@ -59,8 +78,6 @@ plt.xlabel('Epoca')
 plt.ylabel('Metricas')
 plt.ylim([0.5, 1])
 plt.legend(loc='upper left')
-
-model_filename = f'{epochs}__32_conv_32_dense_{floor(time())}'
 
 plt.savefig(f'./model_graphs/{model_filename}.jpg')
 

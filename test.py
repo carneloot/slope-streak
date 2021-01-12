@@ -56,18 +56,19 @@ def test_model(model_path, images, labels, thresholds, print_all=False):
 
     tf.keras.backend.clear_session()
 
-MODEL_PATH = 'models/50_32_conv_1609964632.h5'
-
 images, labels, _ = get_images(TEST_DIRECTORY)
 
-all_models = listdir('models/')
+full_models = [f'models/{name}' for name in listdir('models/')]
+best_models = [f'best/{name}' for name in listdir('best/')]
+
+all_models = full_models + best_models
 
 print('filename', end=',')
 print(','.join(str(x) for x in THRESHOLDS))
 
-for model_filename in all_models:
-    print(model_filename, end=',')
+for model_path in all_models:
+    print(model_path, end=',')
 
-    test_model(f'models/{model_filename}', images, labels, THRESHOLDS)
+    test_model(f'{model_path}', images, labels, THRESHOLDS)
 
     print()
